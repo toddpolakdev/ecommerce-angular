@@ -1,5 +1,3 @@
-<p>Total products: {{ products.length }}</p>
-
-<p *ngFor="let tempProduct of products">
-  {{ tempProduct.name }}: {{ tempProduct.unitPrice | currency : "USD" }}
-</p>
+<div *ngFor="let tempProduct of products()">
+  <p>{{ tempProduct.name }}: {{ tempProduct.unitPrice | currency : "USD" }}</p>
+</div>
