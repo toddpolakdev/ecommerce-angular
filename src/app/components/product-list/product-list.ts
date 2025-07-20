@@ -20,9 +20,7 @@ export class ProductList implements OnInit {
   listProducts() {
     this.ProductService.getProductList().subscribe({
       next: (data) => {
-        console.log('data:', data);
         this.products.set(data);
-        console.log('this.products', this.products);
       },
       error: (err) => {
         console.error('Error fetching products', err);
