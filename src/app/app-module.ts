@@ -14,8 +14,9 @@ import {
 import { ProductService } from './services/product.service';
 import { ProductCategoryMenu } from './components/product-category-menu/product-category-menu';
 import { Search } from './components/search/search';
+import { ProductDetails } from './components/product-details/product-details';
 @NgModule({
-  declarations: [App, ProductList, ProductCategoryMenu, Search],
+  declarations: [App, ProductList, ProductCategoryMenu, Search, ProductDetails],
   imports: [BrowserModule, AppRoutingModule],
   providers: [
     provideBrowserGlobalErrorListeners(),
