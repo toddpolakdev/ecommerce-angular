@@ -1,5 +1,9 @@
 export class Product {
+  set(data: Product) {
+    throw new Error('Method not implemented.');
+  }
   constructor(
+    public id: number,
     public sku: string,
     public name: string,
     public description: string,
