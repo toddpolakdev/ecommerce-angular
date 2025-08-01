@@ -12,7 +12,14 @@ import { ActivatedRoute } from '@angular/router';
 export class ProductList implements OnInit {
   products = signal<Product[] | null>(null);
   currentCateogyId: number = 1;
+  previousCategoryId: number = 1;
   searchMode: boolean = false;
+
+  // new properties for pagination
+  thePageNumber: number = 1;
+  thePageSize: number = 5;
+  theTotalElements: number = 0;
+  previousKeyword: string = '';
 
   constructor(
     private ProductService: ProductService,
@@ -35,18 +42,39 @@ export class ProductList implements OnInit {
     }
   }
 
+  updatePageSize(pageSize: string) {
+    this.thePageSize = +pageSize;
+    this.thePageNumber = 1;
+    this.listProducts();
+  }
+
+  private processResult() {
+    return {
+      next: (data: any) => {
+        this.products.set(data._embedded.products);
+        this.thePageNumber = data.page.number + 1;
+        this.thePageSize = data.page.size;
+        this.theTotalElements = data.page.totalElements;
+      },
+    };
+  }
+
   handleSearchProducts() {
     const theKeyword: string = this.route.snapshot.paramMap.get('keyword')!;
 
-    // search using the keyword
-    this.ProductService.searchProducts(theKeyword).subscribe({
-      next: (data) => {
-        this.products.set(data);
-      },
-      error: (err) => {
-        console.error('Error fetching products', err);
-      },
-    });
+    // if keyword is different than previous set thePageNumber to 1
+    if (this.previousKeyword != theKeyword) {
+      this.thePageNumber = 1;
+    }
+
+    this.previousKeyword = theKeyword;
+    console.log(`keyword=${theKeyword}, thePageNumber=${this.thePageNumber}`);
+
+    this.ProductService.searchProductsPaginate(
+      this.thePageNumber - 1,
+      this.thePageSize,
+      theKeyword
+    ).subscribe(this.processResult());
   }
 
   handleListProducts() {
@@ -60,13 +88,21 @@ export class ProductList implements OnInit {
       this.currentCateogyId = 1;
     }
 
-    this.ProductService.getProductList(this.currentCateogyId).subscribe({
-      next: (data) => {
-        this.products.set(data);
-      },
-      error: (err) => {
-        console.error('Error fetching products', err);
-      },
-    });
+    // check if we have a different category than previous
+    // if so, reset the page number
+    if (this.previousCategoryId != this.currentCateogyId) {
+      this.thePageNumber = 1;
+    }
+
+    this.previousCategoryId = this.currentCateogyId;
+    console.log(
+      `currentCategoryId=${this.currentCateogyId}, thePageNumber=${this.thePageNumber}`
+    );
+
+    this.ProductService.getProductListPaginate(
+      this.thePageNumber - 1,
+      this.thePageSize,
+      this.currentCateogyId
+    ).subscribe(this.processResult());
   }
 }

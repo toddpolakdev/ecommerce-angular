@@ -1,5 +1,46 @@
 <div class="main-content">
   <div class="section-content section-content-p30">
+    <div class="header-pagination">
+      <div class="row">
+        <div class="col-md-6">
+          <span class="mr-2">Page Size: </span>
+          <select #myPageSelect (change)="updatePageSize(myPageSelect.value)">
+            <option selected="true">5</option>
+            <option>10</option>
+            <option>20</option>
+            <option>50</option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <div class="row">
+            <div class="col-md-9">
+              <ngb-pagination
+                [(page)]="thePageNumber"
+                [pageSize]="thePageSize"
+                [collectionSize]="theTotalElements"
+                [maxSize]="3"
+                [boundaryLinks]="true"
+                (pageChange)="listProducts()"
+              ></ngb-pagination>
+            </div>
+            <div class="col-md-3">
+              <span class="mr-2">Page Size: </span>
+              <select
+                #myPageSelect
+                (change)="updatePageSize(myPageSelect.value)"
+              >
+                <option selected="true">5</option>
+                <option>10</option>
+                <option>20</option>
+                <option>50</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="container-fluid">
       <div class="row">
         <!-- loop over the collection of products -->
@@ -19,19 +60,27 @@
           </div>
         </div>
 
-        <!-- if products empty then display a message -->
-        <!-- <div
-          *ngIf="products?.length == 0"
-          class="alert alert-warning col-md-12"
-          role="alert"
-        > -->
         @if (products() !== null && products()!.length === 0) {
         <div class="alert alert-warning col-md-12" role="alert">
           No products found.
         </div>
         }
-        <!-- </div> -->
       </div>
     </div>
+
+    @if (!searchMode) {
+    <div class="footer-pagination">
+      <div class="row">
+        <div class="col-md-6 ms-auto">
+          <ngb-pagination
+            [(page)]="thePageNumber"
+            [pageSize]="thePageSize"
+            [collectionSize]="theTotalElements"
+            (pageChange)="listProducts()"
+          ></ngb-pagination>
+        </div>
+      </div>
+    </div>
+    }
   </div>
 </div>
