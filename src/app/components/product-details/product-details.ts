@@ -2,6 +2,8 @@ import { Component, signal } from '@angular/core';
 import { ProductService } from '../../services/product.service';
 import { Product } from '../../common/product';
 import { ActivatedRoute } from '@angular/router';
+import { CartItem } from '../../common/cart-item';
+import { CartService } from '../../services/cart.service';
 
 @Component({
   selector: 'app-product-details',
@@ -14,6 +16,7 @@ export class ProductDetails {
 
   constructor(
     private ProductService: ProductService,
+    private cartService: CartService,
     private route: ActivatedRoute
   ) {}
 
@@ -33,5 +36,15 @@ export class ProductDetails {
         console.error('Error fetching product', err);
       },
     });
+  }
+
+  addToCart() {
+    console.log(
+      `Adding to cart: ${this.product()!.name}, ${this.product()!.unitPrice}`
+    );
+
+    const theCartItem = new CartItem(this.product()!);
+
+    this.cartService.addToCart(theCartItem);
   }
 }

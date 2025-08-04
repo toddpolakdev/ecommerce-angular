@@ -19,22 +19,10 @@
                 [(page)]="thePageNumber"
                 [pageSize]="thePageSize"
                 [collectionSize]="theTotalElements"
-                [maxSize]="3"
+                [maxSize]="2"
                 [boundaryLinks]="true"
                 (pageChange)="listProducts()"
               ></ngb-pagination>
-            </div>
-            <div class="col-md-3">
-              <span class="mr-2">Page Size: </span>
-              <select
-                #myPageSelect
-                (change)="updatePageSize(myPageSelect.value)"
-              >
-                <option selected="true">5</option>
-                <option>10</option>
-                <option>20</option>
-                <option>50</option>
-              </select>
             </div>
           </div>
         </div>
@@ -56,7 +44,12 @@
             <div class="price>">
               {{ tempProduct.unitPrice | currency : "USD" }}
             </div>
-            <a href="#" class="primary-btn">Add to cart</a>
+            <button
+              (click)="addToCart(tempProduct)"
+              class="btn btn-primary btn-sm"
+            >
+              Add to cart
+            </button>
           </div>
         </div>
 
@@ -76,6 +69,8 @@
             [(page)]="thePageNumber"
             [pageSize]="thePageSize"
             [collectionSize]="theTotalElements"
+            [maxSize]="2"
+            [boundaryLinks]="true"
             (pageChange)="listProducts()"
           ></ngb-pagination>
         </div>
