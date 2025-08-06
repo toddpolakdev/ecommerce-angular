@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { CartItem } from '../common/cart-item';
 import { Subject } from 'rxjs';
-import { Cart } from '../components/cart/cart';
 
 @Injectable({
   providedIn: 'root',
@@ -46,6 +45,27 @@ export class CartService {
 
     // compute cart total and quantity
     this.computeCartTotals();
+  }
+
+  decrementQuantity(theCartItem: CartItem) {
+    theCartItem.quantity--;
+
+    if (theCartItem.quantity == 0) {
+      this.remove(theCartItem);
+    } else {
+      this.computeCartTotals();
+    }
+  }
+  remove(theCartItem: CartItem) {
+    const itemIndex = this.cartItems.findIndex(
+      (tempCartItem) => tempCartItem.id == theCartItem.id
+    );
+
+    if (itemIndex > -1) {
+      this.cartItems.splice(itemIndex, 1);
+
+      this.computeCartTotals();
+    }
   }
 
   computeCartTotals() {

@@ -18,8 +18,9 @@ import { ProductDetails } from './components/product-details/product-details';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { Cart } from './components/cart/cart';
 import { CartStatus } from './components/cart-status/cart-status';
+import { CartDetails } from './components/cart-details/cart-details';
 @NgModule({
-  declarations: [App, ProductList, ProductCategoryMenu, Search, ProductDetails, Cart, CartStatus],
+  declarations: [App, ProductList, ProductCategoryMenu, Search, ProductDetails, Cart, CartStatus, CartDetails],
   imports: [BrowserModule, AppRoutingModule, NgbModule],
   providers: [
     provideBrowserGlobalErrorListeners(),
