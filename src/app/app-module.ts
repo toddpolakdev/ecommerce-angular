@@ -19,9 +19,21 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { Cart } from './components/cart/cart';
 import { CartStatus } from './components/cart-status/cart-status';
 import { CartDetails } from './components/cart-details/cart-details';
+import { Checkout } from './components/checkout/checkout';
+import { ReactiveFormsModule } from '@angular/forms';
 @NgModule({
-  declarations: [App, ProductList, ProductCategoryMenu, Search, ProductDetails, Cart, CartStatus, CartDetails],
-  imports: [BrowserModule, AppRoutingModule, NgbModule],
+  declarations: [
+    App,
+    ProductList,
+    ProductCategoryMenu,
+    Search,
+    ProductDetails,
+    Cart,
+    CartStatus,
+    CartDetails,
+    Checkout,
+  ],
+  imports: [BrowserModule, AppRoutingModule, NgbModule, ReactiveFormsModule],
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
