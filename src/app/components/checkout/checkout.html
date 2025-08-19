@@ -52,8 +52,15 @@
             </div>
             <div class="col-md-9">
               <div class="input-space">
-                <select formControlName="country">
-                  <option>To Do</option>
+                <select
+                  formControlName="country"
+                  (change)="getStates('shippingAddress')"
+                >
+                  @for (country of countries | async; track country.code) {
+                  <option [ngValue]="country">
+                    {{ country.name }}
+                  </option>
+                  }
                 </select>
               </div>
             </div>
@@ -89,8 +96,10 @@
 
             <div class="col-md-9">
               <div class="input-space">
-                <select formControlName="country">
-                  <option>To Do</option>
+                <select formControlName="state">
+                  @for (state of shippingAddressStates; track state.code) {
+                  <option [ngValue]="state">{{ state.name }}</option>
+                  }
                 </select>
               </div>
             </div>
@@ -133,8 +142,16 @@
             </div>
             <div class="col-md-9">
               <div class="input-space">
-                <select formControlName="country">
-                  <option>To Do</option>
+                <select
+                  formControlName="country"
+                  (change)="getStates('billingAddress')"
+                  [compareWith]="compareCountries"
+                >
+                  @for (country of countries | async; track country.code) {
+                  <option [ngValue]="country">
+                    {{ country.name }}
+                  </option>
+                  }
                 </select>
               </div>
             </div>
@@ -170,8 +187,10 @@
 
             <div class="col-md-9">
               <div class="input-space">
-                <select formControlName="country">
-                  <option>To Do</option>
+                <select formControlName="state">
+                  @for (state of billingAddressStates; track state.code) {
+                  <option [ngValue]="state">{{ state.name }}</option>
+                  }
                 </select>
               </div>
             </div>
