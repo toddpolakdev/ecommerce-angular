@@ -1,9 +1,21 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 import { ShopService } from '../../services/shop.service';
+import { CartService } from '../../services/cart.service';
+import { CheckoutService } from '../../services/checkout.service';
 import { Country } from '../../common/country';
 import { State } from '../../common/state';
 import { Observable } from 'rxjs';
+import { CustomValidators } from '../../utils/validators';
+import { Router } from '@angular/router';
+import { Order } from '../../common/order';
+import { OrderItem } from '../../common/order-item';
+import { Purchase } from '../../common/purchase';
 
 @Component({
   selector: 'app-checkout',
@@ -27,15 +39,37 @@ export class Checkout {
 
   constructor(
     private formBuilder: FormBuilder,
-    private ShopService: ShopService
+    private shopService: ShopService,
+    private cartService: CartService,
+    private checkoutService: CheckoutService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
+    this.reviewCartDetails();
+
     this.checkoutFormGroup = this.formBuilder.group({
       customer: this.formBuilder.group({
-        firstName: [''],
-        lastName: [''],
-        email: [''],
+        firstName: new FormControl('', {
+          validators: [
+            Validators.required,
+            Validators.minLength(2),
+            CustomValidators.notOnlyWhiteSpace,
+          ],
+        }),
+        lastName: new FormControl('', {
+          validators: [
+            Validators.required,
+            Validators.minLength(2),
+            CustomValidators.notOnlyWhiteSpace,
+          ],
+        }),
+        email: new FormControl('', {
+          validators: [
+            Validators.required,
+            Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$'),
+          ],
+        }),
       }),
       shippingAddress: this.formBuilder.group({
         country: [''],
@@ -63,15 +97,37 @@ export class Checkout {
 
     const startMonth: number = new Date().getMonth() + 1;
 
-    this.ShopService.getCreditCardMonths(startMonth).subscribe((data) => {
+    this.shopService.getCreditCardMonths(startMonth).subscribe((data) => {
       this.creditCardMonths = data;
     });
 
-    this.ShopService.getCreditCardYears(startMonth).subscribe((data) => {
+    this.shopService.getCreditCardYears(startMonth).subscribe((data) => {
       this.creditCardYears = data;
     });
 
-    this.countries = this.ShopService.getCountries();
+    this.countries = this.shopService.getCountries();
+  }
+
+  reviewCartDetails() {
+    this.cartService.totalQuantity.subscribe(
+      (totalQuantity) => (this.totalQuantity = totalQuantity)
+    );
+
+    this.cartService.totalPrice.subscribe(
+      (totalPrice) => (this.totalPrice = totalPrice)
+    );
+  }
+
+  get firstName() {
+    return this.checkoutFormGroup.get('customer.firstName');
+  }
+
+  get lastName() {
+    return this.checkoutFormGroup.get('customer.lastName');
+  }
+
+  get email() {
+    return this.checkoutFormGroup.get('customer.email');
   }
 
   copyShippingAddressToBillingAddress($event: Event) {
@@ -124,7 +180,7 @@ export class Checkout {
       startMonth = 1;
     }
 
-    this.ShopService.getCreditCardMonths(startMonth).subscribe((data) => {
+    this.shopService.getCreditCardMonths(startMonth).subscribe((data) => {
       this.creditCardMonths = data;
     });
   }
@@ -137,7 +193,7 @@ export class Checkout {
     console.log(`${formGroupName} country code: ${countryCode}`);
     console.log(`${formGroupName} country name: ${countryName}`);
 
-    this.ShopService.getStates(countryCode).subscribe((data) => {
+    this.shopService.getStates(countryCode).subscribe((data) => {
       console.log('states', data);
 
       if (formGroupName === 'shippingAddress') {
@@ -155,27 +211,93 @@ export class Checkout {
   }
 
   onSubmit() {
-    console.log('handling the submit button');
-    console.log(this.checkoutFormGroup?.get('customer')?.value);
+    if (this.checkoutFormGroup.invalid) {
+      this.checkoutFormGroup.markAllAsTouched();
+      return;
+    }
 
-    console.log(
-      'The shipping address country is ' +
-        this.checkoutFormGroup?.get('shippingAddress')?.value.country.name
+    // set up order
+    let order = new Order();
+    order.totalPrice = this.totalPrice;
+    order.totalQuantity = this.totalQuantity;
+
+    // get cart items
+    const cartItems = this.cartService.cartItems;
+
+    // create orderItems from cartItems
+    // let orderItems: OrderItem[] = [];
+
+    // for (let i=0; i < cartItems.length; i++) {
+    //   orderItems[i] = new OrderItem(cartItems[i])
+    // }
+
+    let orderItems: OrderItem[] = cartItems.map(
+      (tempCartItem) => new OrderItem(tempCartItem)
     );
 
-    console.log(
-      'The shipping address state is ' +
-        this.checkoutFormGroup?.get('shippingAddress')?.value.state.name
+    // set up purchase
+    let purchase = new Purchase();
+
+    // populate purchase - customer
+    purchase.customer = this.checkoutFormGroup.controls['customer'].value;
+
+    // populate purchase - shipping address
+    purchase.shippingAddress =
+      this.checkoutFormGroup.controls['shippingAddress'].value;
+
+    const shippingState: State = JSON.parse(
+      JSON.stringify(purchase.shippingAddress.state)
     );
 
-    console.log(
-      'The billing address country is ' +
-        this.checkoutFormGroup?.get('billingAddress')?.value.country.name
+    const shippingCountry: Country = JSON.parse(
+      JSON.stringify(purchase.shippingAddress.country)
     );
 
-    console.log(
-      'The billing address state is ' +
-        this.checkoutFormGroup?.get('billingAddress')?.value.state.name
+    purchase.shippingAddress.state = shippingState.name;
+    purchase.shippingAddress.country = shippingCountry.name;
+
+    // populate purchase - billing address
+    purchase.billingAddress =
+      this.checkoutFormGroup.controls['billingAddress'].value;
+
+    const billingState: State = JSON.parse(
+      JSON.stringify(purchase.billingAddress.state)
     );
+
+    const billingCountry: Country = JSON.parse(
+      JSON.stringify(purchase.billingAddress.country)
+    );
+
+    purchase.billingAddress.state = billingState.name;
+    purchase.billingAddress.country = billingCountry.name;
+
+    // populate purchase - order and orderItems
+    purchase.order = order;
+    purchase.orderItems = orderItems;
+
+    // call REST API via the CheckoutService
+    this.checkoutService.placeOrder(purchase).subscribe({
+      next: (response) => {
+        alert(
+          `Your order has been received.\nOrder tracking number: ${response.orderTrackingNumber}`
+        );
+        this.resetCart();
+      },
+      error: (err) => {
+        alert(`There was an error: ${err.message}`);
+      },
+    });
+  }
+  resetCart() {
+    // reset cart data
+    this.cartService.cartItems = [];
+    this.cartService.totalPrice.next(0);
+    this.cartService.totalQuantity.next(0);
+
+    // reset the form
+    this.checkoutFormGroup.reset();
+
+    // navigate back to the products page
+    this.router.navigateByUrl('/products');
   }
 }

@@ -13,6 +13,18 @@
             <div class="col-md-9">
               <div class="input-space">
                 <input formControlName="firstName" type="text" />
+
+                @if (firstName?.invalid && firstName?.dirty ||
+                firstName?.touched) { @if (firstName?.errors?.['required'] ||
+                firstName?.errors?.['notOnlyWhiteSpace']) {
+                <div class="alert alert-danger mt-1">
+                  First Name is required
+                </div>
+                } @if (firstName?.errors?.['minlength']) {
+                <div class="alert alert-danger mt-1">
+                  First Name must be at least 2 characters
+                </div>
+                } }
               </div>
             </div>
           </div>
@@ -24,6 +36,16 @@
             <div class="col-md-9">
               <div class="input-space">
                 <input formControlName="lastName" type="text" />
+
+                @if (lastName?.invalid && lastName?.dirty || lastName?.touched)
+                { @if (lastName?.errors?.['required'] ||
+                lastName?.errors?.['notOnlyWhiteSpace']) {
+                <div class="alert alert-danger mt-1">Last Name is required</div>
+                } @if (lastName?.errors?.['minlength'] ) {
+                <div class="alert alert-danger mt-1">
+                  Last Name must be at least 2 characters
+                </div>
+                } }
               </div>
             </div>
           </div>
@@ -36,6 +58,12 @@
             <div class="col-md-9">
               <div class="input-space">
                 <input formControlName="email" type="text" />
+                @if (email?.invalid && email?.dirty || email?.touched) { @if
+                (email?.errors?.['required']) {
+                <div class="alert alert-danger mt-1">Email is required</div>
+                } @if (email?.errors?.['pattern']) {
+                <div class="alert alert-danger mt-1">Email is invalid</div>
+                } }
               </div>
             </div>
           </div>
